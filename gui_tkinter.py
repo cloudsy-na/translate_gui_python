@@ -75,7 +75,7 @@ original_combo.current(21)
 original_combo.grid(row=3, column=0)
 
 translated_combo = ttk.Combobox(root, width=50, value=language_list)
-translated_combo.current(26)
+translated_combo.current(43)
 translated_combo.grid(row=3, column=2)
 
 # Clear button
