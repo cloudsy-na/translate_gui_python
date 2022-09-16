@@ -3,6 +3,7 @@ import googletrans
 import textblob
 from tkinter import ttk, messagebox
 import csv
+import os
 
 root = Tk()
 root.title('GAPI Translator')
@@ -54,8 +55,11 @@ def save():
 	originalTextList = original_text.get(1.0,END).strip().split("\n")
 	translatedTextList = translated_text.get(1.0,END).strip().split("\n")
 	
-	# Create new file & writing the data into the file 
-	file = open('output.csv', 'w+', newline ='')
+	# Create new file & writing the data into the file
+	# modifying from https://www.geeksforgeeks.org/writing-data-from-a-python-list-to-csv-row-wise/
+	filename = "output"
+	extformat = '.csv'
+	file = open(filename + extformat, 'w+', newline ='')
 	with file:
 		header = [fromLanguage, toLanguage]
 		writer = csv.DictWriter(file, fieldnames = header)
@@ -64,7 +68,10 @@ def save():
 		for i in range(0, len(originalTextList)):
 			writer.writerow({fromLanguage : originalTextList[i], toLanguage: translatedTextList[i]})
 	
-	
+	messagebox.showinfo("Exported", "CSV file exported at {directory}{filename}".format(
+		directory = os.getcwd() + "\\", 
+		filename = filename + extformat
+	))
 
 # Grab Language List From GoogleTrans
 languages = googletrans.LANGUAGES
