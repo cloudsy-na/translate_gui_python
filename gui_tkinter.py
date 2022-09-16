@@ -18,12 +18,12 @@ def translate_it():
 		# Get Languages From Dictionary Keys
 		# Get the From Language Key
 		for key, value in languages.items():
-			if (value == original_combo.get()):
+			if (value == original_combo.get().lower()):
 				from_language_key = key
 
 		# Get the To Language Key
 		for key, value in languages.items():
-			if (value == translated_combo.get()):
+			if (value == translated_combo.get().lower()):
 				to_language_key = key
 
 		# Turn Original Text into a TextBlob
@@ -57,6 +57,10 @@ languages = googletrans.LANGUAGES
 
 # Convert to list
 language_list = list(languages.values())
+
+#Proper case (english -> English, scots gaelic -> Scots Gaelic)
+for i in range(0, len(language_list)):
+	language_list[i] = language_list[i].title()
 
 # Text Boxes
 original_text = Text(root, height=10, width=40)
