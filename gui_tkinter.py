@@ -1,8 +1,9 @@
 from tkinter import *
-from tkinter import filedialog
 import googletrans
 import textblob
 from tkinter import ttk, messagebox
+import csv
+import os
 
 root = Tk()
 root.title('GAPI Translator')
@@ -12,28 +13,28 @@ root.config(background="#a3aca9")
 
 def translate_it():
 	# Delete Any Previous Translations
-	translated_text.delete(1.0, END)
+	translatedText.delete(1.0, END)
 
 	try:
 		# Get Languages From Dictionary Keys
 		# Get the From Language Key
 		for key, value in languages.items():
-			if (value == original_combo.get()):
-				from_language_key = key
+			if (value == originalCombo.get().lower()):
+				fromLanguageKey = key
 
 		# Get the To Language Key
 		for key, value in languages.items():
-			if (value == translated_combo.get()):
-				to_language_key = key
+			if (value == translatedCombo.get().lower()):
+				toLanguageKey = key
 
 		# Turn Original Text into a TextBlob
-		words = textblob.TextBlob(original_text.get(1.0, END))
+		words = textblob.TextBlob(originalText.get(1.0, END))
 
 		# Translate Text
-		words = words.translate(from_lang=from_language_key , to=to_language_key)
+		words = words.translate(from_lang=fromLanguageKey , to=toLanguageKey)
 
 		# Output translated text to screen
-		translated_text.insert(1.0, words)
+		translatedText.insert(1.0, words)
 
 	except Exception as e:
 		messagebox.showerror("Translator", e)
@@ -41,50 +42,74 @@ def translate_it():
 
 def clear():
 	# Clear the text boxes
-	original_text.delete(1.0, END)
-	translated_text.delete(1.0, END)
+	originalText.delete(1.0, END)
+	translatedText.delete(1.0, END)
 
 
 def save():
-	text_file=open("original_text.txt", "r")
-	text_file.write(translated_text.get(1.0,END))
-	text_file.close()
+	#get from - to language
+	fromLanguage = originalCombo.get()
+	toLanguage = translatedCombo.get()
 
-#language_list = (1,2,3,4,5,6,7,8,9,0,11,12,13,14,15,16,16,1,1,1,1,1,1,1,1,1,1,1,1,1)
+	#get original - translated text
+	originalTextList = originalText.get(1.0,END).strip().split("\n")
+	translatedTextList = translatedText.get(1.0,END).strip().split("\n")
+	
+	# Create new file & writing the data into the file
+	# modifying from https://www.geeksforgeeks.org/writing-data-from-a-python-list-to-csv-row-wise/
+	filename = "output"
+	extformat = '.csv'
+	file = open(filename + extformat, 'w+', newline ='')
+	with file:
+		header = [fromLanguage, toLanguage]
+		writer = csv.DictWriter(file, fieldnames = header)
+
+		writer.writeheader()
+		for i in range(0, len(originalTextList)):
+			writer.writerow({fromLanguage : originalTextList[i], toLanguage: translatedTextList[i]})
+	
+	messagebox.showinfo("Exported", "CSV file exported at {directory}{filename}".format(
+		directory = os.getcwd() + "\\", 
+		filename = filename + extformat
+	))
 
 # Grab Language List From GoogleTrans
 languages = googletrans.LANGUAGES
 
 # Convert to list
-language_list = list(languages.values())
+languageList = list(languages.values())
+
+#Proper case (english -> English, scots gaelic -> Scots Gaelic)
+for i in range(0, len(languageList)):
+	languageList[i] = languageList[i].title()
 
 # Text Boxes
-original_text = Text(root, height=10, width=40)
-original_text.grid(row=2, column=0, pady=20, padx=10)
+originalText = Text(root, height=10, width=40)
+originalText.grid(row=2, column=0, pady=20, padx=10)
 
-translate_button = Button(root, text="Translate!", font=("Helvetica", 24),
+translateButton = Button(root, text="Translate!", font=("Helvetica", 24),
                     activebackground="#51cc0e", command=translate_it)
-translate_button.grid(row=2, column=1, padx=10)
+translateButton.grid(row=2, column=1, padx=10)
 
-translated_text = Text(root, height=10, width=40)
-translated_text.grid(row=2, column=2, pady=20, padx=10)
+translatedText = Text(root, height=10, width=40)
+translatedText.grid(row=2, column=2, pady=20, padx=10)
 
 # Combo boxes
-original_combo = ttk.Combobox(root, width=50, value=language_list)
-original_combo.current(21)
-original_combo.grid(row=3, column=0)
+originalCombo = ttk.Combobox(root, width=50, value=languageList)
+originalCombo.current(21)
+originalCombo.grid(row=3, column=0)
 
-translated_combo = ttk.Combobox(root, width=50, value=language_list)
-translated_combo.current(26)
-translated_combo.grid(row=3, column=2)
+translatedCombo = ttk.Combobox(root, width=50, value=languageList)
+translatedCombo.current(43)
+translatedCombo.grid(row=3, column=2)
 
 # Clear button
-clear_button = Button(root, text="Clear", command=clear,activebackground="red",height=2, width=7,font="Normal 10 bold")
-clear_button.grid(row=4, column=1)
+clearButton = Button(root, text="Clear", command=clear,activebackground="red",height=2, width=7,font="Normal 10 bold")
+clearButton.grid(row=4, column=1)
 
 # export button
-export_button=Button(root, text="Save Result", command=save, activebackground="light green",
+exportButton=Button(root, text="Save Result", command=save, activebackground="light green",
                 height=2, width=15,font="Normal 10 bold")
-export_button.grid(row=5, column=1,pady=20,padx=10)
+exportButton.grid(row=5, column=1,pady=20,padx=10)
 
 root.mainloop()
